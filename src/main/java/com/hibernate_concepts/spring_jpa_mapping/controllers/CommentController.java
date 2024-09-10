@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @CrossOrigin("*")
 @RestController
 @RequestMapping("/api")
@@ -31,4 +33,22 @@ public class CommentController {
         return new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 
+    @GetMapping("tutorials/{tutorialId}/comments")
+    public ResponseEntity<List<Comment>> getAllCommentsByTutorial(@PathVariable("tutorialId") long tutorialId)
+            throws ResourceNotFoundException {
+        if(!tutorialRepository.existsById(tutorialId)) {
+            throw new ResourceNotFoundException("No tutorial found with Id: "+ tutorialId);
+        }
+        List<Comment> comments = commentRepository.findByTutorialId(tutorialId);
+        return new ResponseEntity<>(comments, HttpStatus.OK);
+    }
+
+    @GetMapping("/comments/{id}")
+    public ResponseEntity<Comment> getCommentById(@PathVariable long id)
+            throws ResourceNotFoundException {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No comments found with id: "+ id));
+
+        return new ResponseEntity<>(comment, HttpStatus.OK);
+    }
 }

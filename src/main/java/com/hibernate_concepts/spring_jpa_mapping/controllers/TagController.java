@@ -2,6 +2,7 @@ package com.hibernate_concepts.spring_jpa_mapping.controllers;
 
 import com.hibernate_concepts.spring_jpa_mapping.exceptions.ResourceNotFoundException;
 import com.hibernate_concepts.spring_jpa_mapping.models.Tag;
+import com.hibernate_concepts.spring_jpa_mapping.models.Tutorial;
 import com.hibernate_concepts.spring_jpa_mapping.repository.TagRepository;
 import com.hibernate_concepts.spring_jpa_mapping.repository.TutorialRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,4 +69,26 @@ public class TagController {
         return new ResponseEntity<>(tags, HttpStatus.OK);
     }
 
+    @PutMapping("tags/{id}")
+    public ResponseEntity<Tag> updateTag(@PathVariable("id") long id, @RequestBody Tag tagRequest) throws ResourceNotFoundException {
+        Tag tag = tagRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("Tag id: "+id+" not found"));
+
+        tag.setName(tagRequest.getName());
+        return new ResponseEntity<>(tagRepository.save(tag), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/tutorials/{tutorialId}/tags/{tagId}")
+    public ResponseEntity<?> deleteTagForATutorial(
+            @PathVariable("tutorialId") Long tutorialId, @PathVariable("tagId") Long tagId) throws ResourceNotFoundException {
+        Tutorial tutorial = tutorialRepository.findById(tutorialId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tutorial not found with id: "+tutorialId));
+        tutorial.removeTag(tagId);
+        tutorialRepository.save(tutorial);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+//    @DeleteMapping("/tags/{id}")
+//    public ResponseEntity<?> deleteATag(@PathVariable Long id) {
+//        List<Tutorial> tutorials =
+//    }
 }
